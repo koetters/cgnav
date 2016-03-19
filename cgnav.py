@@ -106,7 +106,7 @@ class PatternStructure(object):
         return (node0,AbstractConceptGraph(E))
 
     def terminal(self):
-        n0 = Node((),"UNIT")
+        n0 = Node((),"")
         n0.atts = set(self.M[0])
         E = [[n0]]
         for i in range(1,len(self.M)):
@@ -180,7 +180,7 @@ class PatternStructure(object):
             print "WARNING: TRIPLE NOT CLASSIFIED"
             return False
 
-        for r2 in r1.nodes[r1.origin[0]].incidences.get(r1.origin,[]):
+        for r2 in r1.nodes[r1.origin[0]].target.incidences.get(r1.origin,[]):
             if self.matches(r1,r2):
 
                 undo = [ r1.nodes[i].target for i in range(len(r1.nodes)) ] 
@@ -252,20 +252,23 @@ def build(pst):
 
 
     while stack:
-
+        print("NEXT STEP")
         concept,additions = stack[-1]
-
+        print("current extent: {0}".format(",".join(concept.extent)))
+        print("     additions: {0}".format(",".join([ p[0] for p in additions ])))
         if not additions:
             stack.pop()
             continue
 
         g0,p0 = additions.pop()
+        print("extent + {0}".format(g0))
         next_intent = pst.windowed_product(concept.intent,p0)
 
         next_extent,next_additions = [],[]
         j,approved = 0,False
 
         for g,p in pst.generators():
+
             if j<len(concept.extent) and concept.extent[j] == g:
                 next_extent.append(g)
                 j += 1
@@ -280,11 +283,13 @@ def build(pst):
                         next_additions.append((g,p))
                 else:
                     if pst.find_morphisms(next_intent,p):
+                        print("rejected! {0} -> {1}".format(g0,g))
                         break
                     else:
                         continue
 
         if approved:
+            print("next concept: extent + {0}".format(g0))
             next_concept = PatternConcept(next_extent,next_intent)
             stack.append((next_concept,next_additions))
 
@@ -311,6 +316,12 @@ class Node(object):
         self.distance = None
         self.target = None
 
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
+
 class RNode(object):
 
     def __init__(self,nodes):
@@ -322,6 +333,12 @@ class RNode(object):
         self.origin = None
         self.next = None
         self.prev = None
+
+    def __str__(self):
+        return "({0})".format(",".join(self.nodes))
+
+    def __repr__(self):
+        return "({0})".format(",".join([ node.__repr__() for node in self.nodes]))
 
 class AbstractConceptGraph(object):
 
@@ -379,6 +396,7 @@ if __name__ == '__main__':
 
     pst = PCFReader().read("family_relations.pcf")
 
+    import pdb;pdb.set_trace()
     lattice = build(pst)
     runner = LatticeRunner(lattice)
     state = 0
