@@ -8,7 +8,7 @@ import curses
 
 class PatternConcept(object):
     def __init__(self,extent,intent):
-        print("extent={0}".format(extent))
+        # print("extent={0}".format(extent))
         self.extent = extent
         self.intent = intent
         self.upper = []
@@ -252,16 +252,16 @@ def build(pst):
 
 
     while stack:
-        print("NEXT STEP")
+        # print("NEXT STEP")
         concept,additions = stack[-1]
-        print("current extent: {0}".format(",".join(concept.extent)))
-        print("     additions: {0}".format(",".join([ p[0] for p in additions ])))
+        # print("current extent: {0}".format(",".join(concept.extent)))
+        # print("     additions: {0}".format(",".join([ p[0] for p in additions ])))
         if not additions:
             stack.pop()
             continue
 
         g0,p0 = additions.pop()
-        print("extent + {0}".format(g0))
+        # print("extent + {0}".format(g0))
         next_intent = pst.windowed_product(concept.intent,p0)
 
         next_extent,next_additions = [],[]
@@ -283,13 +283,13 @@ def build(pst):
                         next_additions.append((g,p))
                 else:
                     if pst.find_morphisms(next_intent,p):
-                        print("rejected! {0} -> {1}".format(g0,g))
+                        # print("rejected! {0} -> {1}".format(g0,g))
                         break
                     else:
                         continue
 
         if approved:
-            print("next concept: extent + {0}".format(g0))
+            # print("next concept: extent + {0}".format(g0))
             next_concept = PatternConcept(next_extent,next_intent)
             stack.append((next_concept,next_additions))
 
@@ -394,9 +394,8 @@ class PCFReader(object):
 
 if __name__ == '__main__':
 
-    pst = PCFReader().read("family_relations.pcf")
+    pst = PCFReader().read(sys.argv[1])
 
-    import pdb;pdb.set_trace()
     lattice = build(pst)
     runner = LatticeRunner(lattice)
     state = 0
