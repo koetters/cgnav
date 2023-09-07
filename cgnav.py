@@ -93,18 +93,18 @@ class PCFFile(object):
 
     def __parse_context(self,relational=False):
 
-        n_objs = int(self.__it.next())
-        n_atts = int(self.__it.next())
+        n_objs = int(self.__it.__next__())
+        n_atts = int(self.__it.__next__())
 
         if relational:
-            objs = [ tuple(self.__it.next().split(",")) for g in range(n_objs) ]
+            objs = [ tuple(self.__it.__next__().split(",")) for g in range(n_objs) ]
         else:
-            objs = [ self.__it.next() for g in range(n_objs) ]
-        atts = [ self.__it.next() for m in range(n_atts) ]
+            objs = [ self.__it.__next__() for g in range(n_objs) ]
+        atts = [ self.__it.__next__() for m in range(n_atts) ]
 
         ctx = FormalContext(atts)
         for k in range(n_objs):
-            obj_intent = set([ atts[i] for i,char in enumerate(self.__it.next()) if char in ["x","X"] ])
+            obj_intent = set([ atts[i] for i,char in enumerate(self.__it.__next__()) if char in ["x","X"] ])
             ctx.add_object(objs[k],obj_intent)
 
         return ctx
@@ -112,7 +112,7 @@ class PCFFile(object):
 
     def parse(self):
 
-        if not self.__it.next() == "B-PCF":
+        if not self.__it.__next__() == "B-PCF":
             raise self.ParseError("Wrong File Format")
 
         pcf = PowerContextFamily()
@@ -283,7 +283,7 @@ class IntensionGraph(object):
             n.attr["style"]="filled"
             n.attr["fillcolor"]="yellow"
 
-        return G.draw(path=None,format='svg',prog='dot')
+        return G.draw(path=None,format='svg',prog='dot').decode(G.encoding)
 
 
     def __add__(self,other):
@@ -301,7 +301,7 @@ class IntensionGraph(object):
         for k in range(1,len(self.schema)):
             C[k] = [ RNode([C.nodesByID(n.id) for n in rnode.nodes],rnode.atts) for rnode in self[k] ]
 
-        C.window = { name:C.nodesByID(n.id) for name,n in self.window.iteritems() }
+        C.window = { name:C.nodesByID(n.id) for name,n in self.window.items() }
 
         return C
 
@@ -437,7 +437,7 @@ class IntensionGraph(object):
         W.window = {}
         for i,nid in enumerate(args):
             W.window[str(i)] = self.nodesByID(str(nid))
-        for name,nid in kwargs.iteritems():
+        for name,nid in kwargs.items():
             W.window[name] = self.nodesByID(str(nid))
 
         return W
@@ -475,7 +475,7 @@ class IntensionGraph(object):
                     edgesByID[t] = rnode
                     Q[k] += [rnode]
 
-        Q.window = { name:cls[node.id] for name,node in self.window.iteritems() }
+        Q.window = { name:cls[node.id] for name,node in self.window.items() }
         return Q
 
 
@@ -552,7 +552,7 @@ class IntensionGraph(object):
             if matrix is None:
                 matrix = {}
 
-            key = iter(common_keys).next()
+            key = iter(common_keys).__next__()
 
             node1 = self.window[key]
             node2 = other.window[key]
@@ -643,7 +643,7 @@ class IntensionGraph(object):
                         return False
 
         else:
-            name,n1 = G1.window.iteritems().next()
+            name,n1 = iter(G1.window.items()).__next__()
             if name not in G2.window:
                 return Table(header) if all else False
             n2 = G2.window[name]
@@ -659,7 +659,7 @@ class IntensionGraph(object):
                 else:
                     return True
             n1.target = n2
-            # print "matching " + n1.__str__() + " with " + n2.__str__()
+            # print("matching " + n1.__str__() + " with " + n2.__str__())
             if all:
                 table = Table(header)
                 G1.find_match(r1,table)
@@ -705,7 +705,7 @@ class IntensionGraph(object):
 
     def find_match(self,r1,table=None):
         if r1.origin is None:
-            print "WARNING: TRIPLE NOT CLASSIFIED"
+            print("WARNING: TRIPLE NOT CLASSIFIED")
             return False
 
         for r2 in r1.nodes[r1.origin[0]].target.incidences.get(r1.origin,[]):
@@ -750,7 +750,7 @@ class IntensionGraph(object):
         fmin = table.data[0]
 
         for endo in table.data:
-            m = len(set(endo.itervalues()))
+            m = len(set(endo.values()))
             if m < min_size:
                 min_size = m
                 fmin = endo
@@ -991,10 +991,10 @@ class LatticeWalker(object):
     def lower(self):
         print("Lower Neighbors:")
         for i,c in enumerate(self.concept.lower):
-            print i, ") ",c
+            print(i,") ",c)
 
     def upper(self):
         print("Upper Neighbors:")
         for i,c in enumerate(self.location.upper):
-            print i, ") ",c
+            print(i,") ",c)
 
