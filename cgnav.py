@@ -184,7 +184,7 @@ class Node(object):
     def sup(self,other):
         node_id = "{0}:{1}".format(self.id,other.id).strip(":") or ":"
         node = Node(node_id)
-        node.atts = self.atts | self.atts
+        node.atts = self.atts | other.atts
         return node
 
 class RNode(object):
